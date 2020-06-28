@@ -1,0 +1,24 @@
+diff -ur /cygdrive/e/TDDOWNLOAD/lib/sqlite-amalgamation-3070602/sqlite-amalgamation-3070602//include/sqlite3.h /cygdrive/d/lib/sqlite//include/sqlite3.h
+--- /cygdrive/e/TDDOWNLOAD/lib/sqlite-amalgamation-3070602/sqlite-amalgamation-3070602//include/sqlite3.h	2011-04-17 13:54:02.000000000 +0800
++++ /cygdrive/d/lib/sqlite//include/sqlite3.h	2011-05-11 17:02:04.578750400 +0800
+@@ -50,7 +50,7 @@
+ #endif
+ 
+ #ifndef SQLITE_API
+-# define SQLITE_API
++# define SQLITE_API __declspec(dllimport)
+ #endif
+ 
+ 
+diff -ur /cygdrive/e/TDDOWNLOAD/lib/sqlite-amalgamation-3070602/sqlite-amalgamation-3070602//sqlite3/sqlite3.c /cygdrive/d/lib/sqlite//sqlite3/sqlite3.c
+--- /cygdrive/e/TDDOWNLOAD/lib/sqlite-amalgamation-3070602/sqlite-amalgamation-3070602//sqlite3/sqlite3.c	2011-04-17 13:54:02.000000000 +0800
++++ /cygdrive/d/lib/sqlite//sqlite3/sqlite3.c	2011-05-11 17:01:46.594721800 +0800
+@@ -23,7 +23,7 @@
+ # define SQLITE_PRIVATE static
+ #endif
+ #ifndef SQLITE_API
+-# define SQLITE_API
++# define SQLITE_API __declspec(dllexport)
+ #endif
+ /************** Begin file sqliteInt.h ***************************************/
+ /*

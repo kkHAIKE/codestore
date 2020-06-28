@@ -1,0 +1,125 @@
+diff -ur /cygdrive/e/TDDOWNLOAD/lib/ocilib-3.9.0-windows/ocilib//include/ocilib.h /cygdrive/d/lib/oci/ocilib//include/ocilib.h
+--- /cygdrive/e/TDDOWNLOAD/lib/ocilib-3.9.0-windows/ocilib//include/ocilib.h	2011-04-23 23:12:26.000000000 +0800
++++ /cygdrive/d/lib/oci/ocilib//include/ocilib.h	2011-05-13 12:50:16.846891500 +0800
+@@ -2038,7 +2038,8 @@
+ (
+     POCI_ERROR   err_handler,
+     const mtext *lib_path,
+-    unsigned int mode
++    unsigned int mode,
++	int charset
+ );
+ 
+ /**
+@@ -3158,7 +3159,7 @@
+  * by OCI, not the application. Applications that can use connection pooling include
+  * middle-tier applications for Web application servers and e-mail servers.
+  *
+- * @par Session Pools (from Oracle Oracl® Call Interface Programmer's Guide)
++ * @par Session Pools (from Oracle Oracl?Call Interface Programmer's Guide)
+  *
+  * Session pooling means that the application will create and maintain a group of stateless
+  * sessions to the database. These sessions will be handed over to thin clients as requested.
+@@ -15115,7 +15116,7 @@
+  * message in the previous queue.
+  *
+  * @note
+- * On output, parameter 'len' holds the number of bytes copied into the given buffer
++ * On output parameter len holds the number of bytes copied into the given buffer
+  *
+  * @return
+  * TRUE on success otherwise FALSE
+@@ -15937,7 +15938,7 @@
+  * @warning
+  * The return value is valid only until:
+  * - OCIDequeueListen() is called again
+- * - OCI_DequeueFree(à is called to free the Dequeue object
++ * - OCI_DequeueFree(?is called to free the Dequeue object
+  * So Do not store the handle value across calls to OCIDequeueListen()
+  *
+  * @return
+diff -ur /cygdrive/e/TDDOWNLOAD/lib/ocilib-3.9.0-windows/ocilib//src/library.c /cygdrive/d/lib/oci/ocilib//src/library.c
+--- /cygdrive/e/TDDOWNLOAD/lib/ocilib-3.9.0-windows/ocilib//src/library.c	2011-04-19 20:50:32.000000000 +0800
++++ /cygdrive/d/lib/oci/ocilib//src/library.c	2011-05-11 16:55:06.620844600 +0800
+@@ -172,6 +172,7 @@
+ /* OCI function pointers */
+ 
+ OCIENVCREATE                 OCIEnvCreate                 = NULL;
++OCIENVNLSCREATE				 OCIEnvNlsCreate			  = NULL;
+ OCISERVERATTACH              OCIServerAttach              = NULL;
+ OCISERVERDETACH              OCIServerDetach              = NULL;
+ OCIHANDLEALLOC               OCIHandleAlloc               = NULL;
+@@ -464,7 +465,8 @@
+ (
+     POCI_ERROR   err_handler,
+     const mtext *lib_path,
+-    unsigned int mode
++    unsigned int mode,
++	int charset
+ )
+ {
+     boolean res  = TRUE;
+@@ -577,6 +579,8 @@
+         LIB_SYMBOL(OCILib.lib_handle, "OCIEnvCreate", OCIEnvCreate,
+                    OCIENVCREATE);
+ 
++LIB_SYMBOL(OCILib.lib_handle, "OCIEnvNlsCreate", OCIEnvNlsCreate,
++			OCIENVNLSCREATE);
+         LIB_SYMBOL(OCILib.lib_handle, "OCIServerAttach", OCIServerAttach,
+                    OCISERVERATTACH);
+         LIB_SYMBOL(OCILib.lib_handle, "OCIServerDetach", OCIServerDetach,
+@@ -1064,6 +1068,10 @@
+         {
+             OCILib.version_runtime = OCI_8_0;
+         }
++else if (OCIEnvNlsCreate != NULL)
++		{
++			OCILib.version_runtime = OCI_8_0;
++		}
+         else
+         {
+             LIB_CLOSE(OCILib.lib_handle);
+@@ -1136,9 +1144,12 @@
+ 
+         /* create environment on success */
+ 
+-        res = res && (OCI_SUCCESS == OCIEnvCreate(&OCILib.env, oci_mode,
+-                                                  (dvoid *) NULL, NULL, NULL, NULL,
+-                                                  (size_t) 0, (dvoid **) NULL));
++//         res = res && (OCI_SUCCESS == OCIEnvCreate(&OCILib.env, oci_mode,
++//                                                   (dvoid *) NULL, NULL, NULL, NULL,
++//                                                   (size_t) 0, (dvoid **) NULL));
++		res = res && (OCI_SUCCESS == OCIEnvNlsCreate(&OCILib.env, oci_mode,
++		                                             (dvoid *) NULL, NULL, NULL, NULL,
++		                                             (size_t) 0, (dvoid **) NULL,(ub2)charset,(ub2)charset));
+ 
+         if (res == FALSE)
+         {
+diff -ur /cygdrive/e/TDDOWNLOAD/lib/ocilib-3.9.0-windows/ocilib//src/oci_api.h /cygdrive/d/lib/oci/ocilib//src/oci_api.h
+--- /cygdrive/e/TDDOWNLOAD/lib/ocilib-3.9.0-windows/ocilib//src/oci_api.h	2011-04-20 22:50:02.000000000 +0800
++++ /cygdrive/d/lib/oci/ocilib//src/oci_api.h	2011-05-11 16:44:53.944801500 +0800
+@@ -79,6 +79,13 @@
+     void   **usrmempp
+ );
+ 
++typedef sword (*OCIENVNLSCREATE)(OCIEnv **envp, ub4 mode, void  *ctxp,
++				 void  *(*malocfp)(void  *ctxp, size_t size),
++				 void  *(*ralocfp)(void  *ctxp, void  *memptr, size_t newsize),
++				 void   (*mfreefp)(void  *ctxp, void  *memptr),
++				 size_t xtramem_sz, void  **usrmempp,
++				 ub2 charset, ub2 ncharset);
++
+ typedef sword (*OCIHANDLEALLOC)
+ (
+     const void  *parenth,
+diff -ur /cygdrive/e/TDDOWNLOAD/lib/ocilib-3.9.0-windows/ocilib//src/oci_import.h /cygdrive/d/lib/oci/ocilib//src/oci_import.h
+--- /cygdrive/e/TDDOWNLOAD/lib/ocilib-3.9.0-windows/ocilib//src/oci_import.h	2011-04-19 20:50:32.000000000 +0800
++++ /cygdrive/d/lib/oci/ocilib//src/oci_import.h	2011-05-11 16:45:17.691159800 +0800
+@@ -91,6 +91,7 @@
+ /* symbol list */
+ 
+ extern OCIENVCREATE                 OCIEnvCreate;
++extern OCIENVNLSCREATE				OCIEnvNlsCreate;
+ extern OCISERVERATTACH              OCIServerAttach;
+ extern OCISERVERDETACH              OCIServerDetach;
+ extern OCIHANDLEALLOC               OCIHandleAlloc;

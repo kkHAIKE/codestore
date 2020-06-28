@@ -1,0 +1,27 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<Window size="300,200" sizebox="4,4,4,4" caption="0,0,0,24" mininfo="300,200" xsi:noNamespaceSchemaLocation="file:///C:/Users/Administrator/Desktop/dexter/Projects/DirectUI/Debug/dui.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" roundcorner="2,2">
+	<VerticalLayout>
+	<HorizontalLayout inset="4,4,4,0" height="24" name="tilebar" childpadding="2">
+		<Control width="16" bkimage="eve_trade_ui - 0002.ico" padding="0,0,4,0" maxheight="16"/>
+		<Label text="测试窗口-静态标签" width="110" textcolor="#ffffffff"/>
+		<Control/>
+		<Button name="mixbtn" width="32" maxheight="16"/>
+		<Button name="restorebtn" visible="false" width="32" maxheight="16"/>
+		<Button name="maxbtn" width="32" maxheight="16"/>
+		<Button name="closebtn" width="32" maxheight="16"/>
+	</HorizontalLayout>
+	<VerticalLayout inset="1,1,1,1" vscrollbar="show" name="dialog" bordersize="1" bordercolor="#FF000000">
+		<Text  text="{c #ff0000ff}测试支持{/c}{c #ffffffff}html语法的{/c}{a}{c #ff00ff00 #ffffff00}minihtml渲染器{/c}{/a}" height="30" showhtml="true" />
+		<MenuButton name="testMenu" text="测试菜单按钮" height="20" maxwidth="80"/>
+		<Progress value="40"/>
+		<Edit  text="测试文本框" height="21" />
+		<Option  text="测试选项按钮" height="40" group="true" />
+		<Option  text="测试选项按钮" height="40" group="true" />
+		<Button  text="测试按钮" height="40"  />
+		<Button  text="测试按钮" height="40"  />
+		<Option  text="测试复选按钮" height="40" tabstop="true" />
+		<Option  text="测试复选按钮" height="40" tabstop="true" />
+	</VerticalLayout>
+	</VerticalLayout>
+</Window>
+

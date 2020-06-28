@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Window xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="file:///C:/Users/Administrator/Desktop/dexter/Projects/DirectUI/Debug/dui.xsd" size="1024,720" sizebox="4,4,4,4" caption="4,5,0,32" mininfo="1024,720" roundcorner="2,2">
+	<VerticalLayout bkimage="file='skin\BackGround.bmp' corner='6,6,6,2'">
+		<HorizontalLayout inset="8,0,9,0" height="32">
+			<Control width="197" maxheight="28" bkimage="skin\tileicotext.png" padding="0,4,0,0"/>
+			<Control/>
+			<Control width="2" maxheight="23" bkimage="skin\tileline.png" padding="0,5,0,4"/>
+			<MenuButton width="63" maxheight="27" normalimage="skin\setting_01.gif" hotimage="skin\setting_02.gif" pushedimage="skin\setting_03.gif" padding="0,3,0,2"/>
+			<MenuButton width="63" maxheight="27" normalimage="skin\new_01.gif" hotimage="skin\new_02.gif" pushedimage="skin\new_03.gif" padding="0,3,0,2"/>
+			<MenuButton width="63" maxheight="27" normalimage="skin\help_01.gif" hotimage="skin\help_02.gif" pushedimage="skin\help_03.gif" padding="0,3,0,2"/>
+			<Button name="mixbtn" width="26" maxheight="18" normalimage="skin\minimize_01.gif" hotimage="skin\minimize_02.gif" pushedimage="skin\minimize_03.gif" padding="0,8,0,6"/>
+			<Button name="restorebtn" visible="false" width="25" maxheight="18" normalimage="skin\restoreDown_01.gif" hotimage="skin\restoreDown_02.gif" pushedimage="skin\restoreDown_03.gif" padding="0,8,0,6"/>
+			<Button name="maxbtn" width="25" maxheight="18" normalimage="skin\maximize_01.gif" hotimage="skin\maximize_02.gif" pushedimage="skin\maximize_03.gif" padding="0,8,0,6"/>
+			<Button name="closebtn" width="42" maxheight="18" normalimage="skin\close_01.gif" hotimage="skin\close_02.gif" pushedimage="skin\close_03.gif" padding="0,8,0,6"/>
+		</HorizontalLayout>
+	</VerticalLayout>
+</Window>

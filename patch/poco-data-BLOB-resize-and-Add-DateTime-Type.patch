@@ -1,0 +1,667 @@
+diff -urN '--exclude=*.vcproj' '--exclude=*.user' '--exclude=bin' '--exclude=obj' '--exclude=*.ncb' '--exclude=*.suo' /cygdrive/e/TDDOWNLOAD/lib/poco-1.4.0-all/Data//MySQL/include/Poco/Data/MySQL/Binder.h /cygdrive/d/lib/poco-1.4.0/Data//MySQL/include/Poco/Data/MySQL/Binder.h
+--- /cygdrive/e/TDDOWNLOAD/lib/poco-1.4.0-all/Data//MySQL/include/Poco/Data/MySQL/Binder.h	2010-12-16 06:46:00.000000000 +0800
++++ /cygdrive/d/lib/poco-1.4.0/Data//MySQL/include/Poco/Data/MySQL/Binder.h	2011-08-27 14:17:58.114527900 +0800
+@@ -47,6 +47,10 @@
+ #include <mysql.h>
+ 
+ 
++//////////////////////////////////MY//////////////////////////////////////
++#include <map>
++#include "Poco/Data/MySQL/MySQLDateTime.h"
++//////////////////////////////////MY//////////////////////////////////////
+ namespace Poco {
+ namespace Data {
+ namespace MySQL {
+@@ -104,6 +108,9 @@
+ 	virtual void bind(std::size_t pos, const Poco::Data::BLOB& val);
+ 		/// Binds a BLOB.
+ 
++	//////////////////////////////////MY//////////////////////////////////////
++	virtual void bind(std::size_t pos, const DateTime& val);
++	//////////////////////////////////MY//////////////////////////////////////
+ 	virtual void bind(std::size_t pos);
+ 		/// Binds a NULL value.
+ 
+@@ -126,6 +133,9 @@
+ 
+ private:
+ 	std::vector<MYSQL_BIND> _bindArray;
++	//////////////////////////////////MY//////////////////////////////////////
++	std::map<int,SharedPtr<MySQLDateTime>> _datetime;
++	//////////////////////////////////MY//////////////////////////////////////
+ };
+ 
+ 
+diff -urN '--exclude=*.vcproj' '--exclude=*.user' '--exclude=bin' '--exclude=obj' '--exclude=*.ncb' '--exclude=*.suo' /cygdrive/e/TDDOWNLOAD/lib/poco-1.4.0-all/Data//MySQL/include/Poco/Data/MySQL/Extractor.h /cygdrive/d/lib/poco-1.4.0/Data//MySQL/include/Poco/Data/MySQL/Extractor.h
+--- /cygdrive/e/TDDOWNLOAD/lib/poco-1.4.0-all/Data//MySQL/include/Poco/Data/MySQL/Extractor.h	2010-12-16 06:46:00.000000000 +0800
++++ /cygdrive/d/lib/poco-1.4.0/Data//MySQL/include/Poco/Data/MySQL/Extractor.h	2011-05-10 16:43:49.355699900 +0800
+@@ -105,6 +105,9 @@
+ 	virtual bool extract(std::size_t pos, Poco::Data::BLOB& val);
+ 		/// Extracts a BLOB.
+ 
++	//////////////////////////////////MY//////////////////////////////////////
++	virtual bool extract(std::size_t pos, DateTime& val);
++	//////////////////////////////////MY//////////////////////////////////////
+ private:
+ 	bool realExtractFixed(std::size_t pos, enum_field_types type, void* buffer, size_t length = 0);
+ 
+diff -urN '--exclude=*.vcproj' '--exclude=*.user' '--exclude=bin' '--exclude=obj' '--exclude=*.ncb' '--exclude=*.suo' /cygdrive/e/TDDOWNLOAD/lib/poco-1.4.0-all/Data//MySQL/include/Poco/Data/MySQL/MySQLDateTime.h /cygdrive/d/lib/poco-1.4.0/Data//MySQL/include/Poco/Data/MySQL/MySQLDateTime.h
+--- /cygdrive/e/TDDOWNLOAD/lib/poco-1.4.0-all/Data//MySQL/include/Poco/Data/MySQL/MySQLDateTime.h	1970-01-01 08:00:00.000000000 +0800
++++ /cygdrive/d/lib/poco-1.4.0/Data//MySQL/include/Poco/Data/MySQL/MySQLDateTime.h	2011-05-11 11:54:38.102672400 +0800
+@@ -0,0 +1,51 @@
++#ifndef MySQL_DateTime_INCLUDED
++#define MySQL_DateTime_INCLUDED
++
++#include "Poco/DateTime.h"
++
++namespace Poco {
++namespace Data {
++namespace MySQL {
++
++class MySQLDateTime:public MYSQL_TIME
++{
++public:
++	MySQLDateTime(DWORD    wyear=0,
++		DWORD   wmonth=0,
++		DWORD   wday=0,
++		DWORD   whour=0,
++		DWORD   wminute=0,
++		DWORD   wsecond=0)
++	{
++		year=wyear;
++		month=wmonth;
++		day=wday;
++		hour=whour;
++		minute=wminute;
++		second=wsecond;
++
++		second_part=0;
++		neg=false;
++		time_type=MYSQL_TIMESTAMP_DATETIME;
++	}
++	MySQLDateTime(const DateTime &val)
++	{
++		year = (DWORD)val.year();
++		month = (DWORD)val.month();
++		day = (DWORD)val.day();
++		hour = (DWORD)val.hour();
++		minute = (DWORD)val.minute();
++		second = (DWORD)val.second();
++
++		second_part=0;
++		neg=false;
++		time_type=MYSQL_TIMESTAMP_DATETIME;
++	}
++	operator DateTime()
++	{
++		return DateTime(year,month?month:1,day?day:1,hour,minute,second);
++	}
++};
++
++}}}
++#endif
+\ No newline at end of file
+diff -urN '--exclude=*.vcproj' '--exclude=*.user' '--exclude=bin' '--exclude=obj' '--exclude=*.ncb' '--exclude=*.suo' /cygdrive/e/TDDOWNLOAD/lib/poco-1.4.0-all/Data//MySQL/include/Poco/Data/MySQL/SessionHandle.h /cygdrive/d/lib/poco-1.4.0/Data//MySQL/include/Poco/Data/MySQL/SessionHandle.h
+--- /cygdrive/e/TDDOWNLOAD/lib/poco-1.4.0-all/Data//MySQL/include/Poco/Data/MySQL/SessionHandle.h	2010-12-16 06:46:00.000000000 +0800
++++ /cygdrive/d/lib/poco-1.4.0/Data//MySQL/include/Poco/Data/MySQL/SessionHandle.h	2011-05-10 16:56:21.244705500 +0800
+@@ -70,6 +70,9 @@
+ 
+ 	operator MYSQL* ();
+ 
++	//////////////////////////////////MY//////////////////////////////////////
++	void setCharSet(const char* charset);
++	//////////////////////////////////MY//////////////////////////////////////
+ private:
+ 	SessionHandle(const SessionHandle&);
+ 	SessionHandle& operator=(const SessionHandle&);
+diff -urN '--exclude=*.vcproj' '--exclude=*.user' '--exclude=bin' '--exclude=obj' '--exclude=*.ncb' '--exclude=*.suo' /cygdrive/e/TDDOWNLOAD/lib/poco-1.4.0-all/Data//MySQL/src/Binder.cpp /cygdrive/d/lib/poco-1.4.0/Data//MySQL/src/Binder.cpp
+--- /cygdrive/e/TDDOWNLOAD/lib/poco-1.4.0-all/Data//MySQL/src/Binder.cpp	2010-12-16 06:46:00.000000000 +0800
++++ /cygdrive/d/lib/poco-1.4.0/Data//MySQL/src/Binder.cpp	2011-08-27 14:11:59.092993100 +0800
+@@ -136,6 +136,15 @@
+ }
+ 
+ 
++//////////////////////////////////MY//////////////////////////////////////
++void Binder::bind(std::size_t pos, const DateTime& val)
++{
++	MySQLDateTime* ts=new MySQLDateTime(val);
++	_datetime[pos]=ts;
++	//MYSQL_TYPE_DATE
++	realBind(pos, MYSQL_TYPE_DATETIME, ts, 0);
++}
++//////////////////////////////////MY//////////////////////////////////////
+ void Binder::bind(std::size_t pos)
+ {
+ 	realBind(pos, MYSQL_TYPE_NULL, NULL, 0);
+diff -urN '--exclude=*.vcproj' '--exclude=*.user' '--exclude=bin' '--exclude=obj' '--exclude=*.ncb' '--exclude=*.suo' /cygdrive/e/TDDOWNLOAD/lib/poco-1.4.0-all/Data//MySQL/src/Extractor.cpp /cygdrive/d/lib/poco-1.4.0/Data//MySQL/src/Extractor.cpp
+--- /cygdrive/e/TDDOWNLOAD/lib/poco-1.4.0-all/Data//MySQL/src/Extractor.cpp	2010-12-16 06:46:00.000000000 +0800
++++ /cygdrive/d/lib/poco-1.4.0/Data//MySQL/src/Extractor.cpp	2011-08-27 14:12:53.728118000 +0800
+@@ -36,6 +36,9 @@
+ 
+ #include "Poco/Data/MySQL/Extractor.h"
+ 
++//////////////////////////////////MY//////////////////////////////////////
++#include "Poco/Data/MySQL/MySQLDateTime.h"
++//////////////////////////////////MY//////////////////////////////////////
+ 
+ namespace Poco {
+ namespace Data {
+@@ -157,6 +160,16 @@
+ }
+ 
+ 
++//////////////////////////////////MY//////////////////////////////////////
++bool Extractor::extract(std::size_t pos, DateTime& val)
++{
++	MySQLDateTime ts;
++	bool ret=realExtractFixed(pos, MYSQL_TYPE_DATETIME, &ts);
++	if(ret)
++		val=ts;
++	return ret;
++}
++//////////////////////////////////MY//////////////////////////////////////
+ bool Extractor::realExtractFixed(std::size_t pos, enum_field_types type, void* buffer, size_t length)
+ {
+ 	MYSQL_BIND bind = {0};
+diff -urN '--exclude=*.vcproj' '--exclude=*.user' '--exclude=bin' '--exclude=obj' '--exclude=*.ncb' '--exclude=*.suo' /cygdrive/e/TDDOWNLOAD/lib/poco-1.4.0-all/Data//MySQL/src/ResultMetadata.cpp /cygdrive/d/lib/poco-1.4.0/Data//MySQL/src/ResultMetadata.cpp
+--- /cygdrive/e/TDDOWNLOAD/lib/poco-1.4.0-all/Data//MySQL/src/ResultMetadata.cpp	2010-12-16 06:46:00.000000000 +0800
++++ /cygdrive/d/lib/poco-1.4.0/Data//MySQL/src/ResultMetadata.cpp	2011-08-27 14:13:16.045394500 +0800
+@@ -39,6 +39,9 @@
+ #include <cstring>
+ 
+ 
++//////////////////////////////////MY//////////////////////////////////////
++#define MAX_LONGBLOB_BUFFER	(32*1024*1024)	//32M
++//////////////////////////////////MY//////////////////////////////////////
+ namespace
+ {
+ 	class ResultMetadataHandle
+@@ -82,19 +85,24 @@
+ 		case MYSQL_TYPE_DOUBLE:   return sizeof(double);
+ 		case MYSQL_TYPE_LONGLONG: return sizeof(Poco::Int64);
+ 
+-		case MYSQL_TYPE_DECIMAL:
+-		case MYSQL_TYPE_NEWDECIMAL:
+-		case MYSQL_TYPE_STRING:
+-		case MYSQL_TYPE_VAR_STRING:
++		//////////////////////////////////MY//////////////////////////////////////
++		case MYSQL_TYPE_LONG_BLOB:
+ 		case MYSQL_TYPE_TINY_BLOB:
+ 		case MYSQL_TYPE_MEDIUM_BLOB:
+-		case MYSQL_TYPE_LONG_BLOB:
+ 		case MYSQL_TYPE_BLOB:
+-		case MYSQL_TYPE_NULL:
++			return (field.length==-1)?MAX_LONGBLOB_BUFFER:field.length;
++
+ 		case MYSQL_TYPE_TIMESTAMP:
+ 		case MYSQL_TYPE_DATE:
+ 		case MYSQL_TYPE_TIME:
+ 		case MYSQL_TYPE_DATETIME:
++		//	return sizeof(MYSQL_TIME);
++		//////////////////////////////////MY//////////////////////////////////////
++		case MYSQL_TYPE_DECIMAL:
++		case MYSQL_TYPE_NEWDECIMAL:
++		case MYSQL_TYPE_STRING:
++		case MYSQL_TYPE_VAR_STRING:
++		case MYSQL_TYPE_NULL:
+ 		case MYSQL_TYPE_YEAR:
+ 		case MYSQL_TYPE_NEWDATE:
+ 		case MYSQL_TYPE_VARCHAR:
+@@ -149,13 +157,17 @@
+ 		case MYSQL_TYPE_BLOB:
+ 			return Poco::Data::MetaColumn::FDT_BLOB;
+ 
+-		case MYSQL_TYPE_DECIMAL:
+-		case MYSQL_TYPE_NEWDECIMAL:
+-		case MYSQL_TYPE_NULL:
++		//////////////////////////////////MY//////////////////////////////////////
+ 		case MYSQL_TYPE_TIMESTAMP:
+ 		case MYSQL_TYPE_DATE:
+ 		case MYSQL_TYPE_TIME:
+ 		case MYSQL_TYPE_DATETIME:
++			return Poco::Data::MetaColumn::FDT_DATETIME;
++		//////////////////////////////////MY//////////////////////////////////////
++
++		case MYSQL_TYPE_DECIMAL:
++		case MYSQL_TYPE_NEWDECIMAL:
++		case MYSQL_TYPE_NULL:
+ 		case MYSQL_TYPE_YEAR:
+ 		case MYSQL_TYPE_NEWDATE:
+ 		case MYSQL_TYPE_VARCHAR:
+diff -urN '--exclude=*.vcproj' '--exclude=*.user' '--exclude=bin' '--exclude=obj' '--exclude=*.ncb' '--exclude=*.suo' /cygdrive/e/TDDOWNLOAD/lib/poco-1.4.0-all/Data//MySQL/src/SessionHandle.cpp /cygdrive/d/lib/poco-1.4.0/Data//MySQL/src/SessionHandle.cpp
+--- /cygdrive/e/TDDOWNLOAD/lib/poco-1.4.0-all/Data//MySQL/src/SessionHandle.cpp	2010-12-16 06:46:00.000000000 +0800
++++ /cygdrive/d/lib/poco-1.4.0/Data//MySQL/src/SessionHandle.cpp	2011-08-27 14:13:31.368270900 +0800
+@@ -117,4 +117,10 @@
+ }
+ 
+ 
++//////////////////////////////////MY//////////////////////////////////////
++void SessionHandle::setCharSet(const char* charset)
++{
++	mysql_set_character_set(h,charset);
++}
++//////////////////////////////////MY//////////////////////////////////////
+ } } } // namespace Poco::Data::MySQL
+diff -urN '--exclude=*.vcproj' '--exclude=*.user' '--exclude=bin' '--exclude=obj' '--exclude=*.ncb' '--exclude=*.suo' /cygdrive/e/TDDOWNLOAD/lib/poco-1.4.0-all/Data//MySQL/src/SessionImpl.cpp /cygdrive/d/lib/poco-1.4.0/Data//MySQL/src/SessionImpl.cpp
+--- /cygdrive/e/TDDOWNLOAD/lib/poco-1.4.0-all/Data//MySQL/src/SessionImpl.cpp	2010-12-16 06:46:00.000000000 +0800
++++ /cygdrive/d/lib/poco-1.4.0/Data//MySQL/src/SessionImpl.cpp	2011-08-27 14:19:11.373718100 +0800
+@@ -67,7 +67,7 @@
+ 	std::map<std::string, std::string> options;
+ 
+ 	// Default values
+-	options["host"] = "localhost";
++	options["host"] = "127.0.0.1";
+ 	options["port"] = "3306";
+ 	options["user"] = "";
+ 	options["password"] = "";
+@@ -75,6 +75,9 @@
+ 	options["compress"] = "";
+ 	options["auto-reconnect"] = "";
+ 
++//////////////////////////////////MY//////////////////////////////////////
++	options["charset"] = "";
++//////////////////////////////////MY//////////////////////////////////////
+ 	//
+ 	// Parse string
+ 	//
+@@ -113,12 +116,12 @@
+ 	{
+ 		throw MySQLException("create session: specify user name");
+ 	}
+-
+-	if (options["db"] == "")
+-	{
+-		throw MySQLException("create session: specify database");
+-	}
+-
++//////////////////////////////////MY//////////////////////////////////////
++//	if (options["db"] == "")
++//	{
++//		throw MySQLException("create session: specify database");
++//	}
++//////////////////////////////////MY//////////////////////////////////////
+ 	unsigned int port = 0;
+ 	if (!NumberParser::tryParseUnsigned(options["port"], port) || 0 == port || port > 65535)
+ 	{
+@@ -166,6 +169,10 @@
+ 			options["db"].c_str(), 
+ 			port);
+ 
++	//////////////////////////////////MY//////////////////////////////////////
++	if(options["charset"] != "")
++		_mysql.setCharSet(options["charset"].c_str());
++	//////////////////////////////////MY//////////////////////////////////////
+ 	_connected = true;
+ }
+ 	
+diff -urN '--exclude=*.vcproj' '--exclude=*.user' '--exclude=bin' '--exclude=obj' '--exclude=*.ncb' '--exclude=*.suo' /cygdrive/e/TDDOWNLOAD/lib/poco-1.4.0-all/Data//ODBC/include/Poco/Data/ODBC/Binder.h /cygdrive/d/lib/poco-1.4.0/Data//ODBC/include/Poco/Data/ODBC/Binder.h
+--- /cygdrive/e/TDDOWNLOAD/lib/poco-1.4.0-all/Data//ODBC/include/Poco/Data/ODBC/Binder.h	2010-12-16 06:45:58.000000000 +0800
++++ /cygdrive/d/lib/poco-1.4.0/Data//ODBC/include/Poco/Data/ODBC/Binder.h	2011-05-12 09:47:55.359260400 +0800
+@@ -47,6 +47,9 @@
+ #include "Poco/Data/ODBC/Parameter.h"
+ #include "Poco/Data/ODBC/ODBCColumn.h"
+ #include "Poco/Data/ODBC/Utility.h"
++//////////////////////////////////MY//////////////////////////////////////	
++#include "Poco/Data/ODBC/ODBCDateTime.h"
++//////////////////////////////////MY//////////////////////////////////////	
+ #include "Poco/Exception.h"
+ #ifdef POCO_OS_FAMILY_WINDOWS
+ #include <windows.h>
+@@ -118,6 +121,9 @@
+ 	void bind(std::size_t pos, const Poco::Data::BLOB& val);
+ 		/// Binds a BLOB.
+ 
++//////////////////////////////////MY//////////////////////////////////////
++	void bind(std::size_t pos, const DateTime& val);
++//////////////////////////////////MY//////////////////////////////////////
+ 	void bind(std::size_t pos);
+ 		/// Binds a NULL value.
+ 
+@@ -187,6 +193,9 @@
+ 	std::vector<SQLLEN*> _lengthIndicator;
+ 	SizeMap _dataSize;
+ 	ParameterBinding _paramBinding;
++//////////////////////////////////MY//////////////////////////////////////
++	std::map<int, Poco::SharedPtr<ODBCDateTime>> _datatime;
++//////////////////////////////////MY//////////////////////////////////////
+ };
+ 
+ 
+@@ -264,6 +273,14 @@
+ 	bindImpl(pos, val, SQL_C_STINYINT);
+ }
+ 
++//////////////////////////////////MY//////////////////////////////////////
++inline void Binder::bind(std::size_t pos, const DateTime& val)
++{
++	ODBCDateTime* ts=new ODBCDateTime(val);
++	_datatime[pos]=ts;
++	bindImpl(pos, *ts, SQL_C_TIMESTAMP);
++}
++//////////////////////////////////MY//////////////////////////////////////
+ 
+ inline void Binder::setDataBinding(Binder::ParameterBinding binding)
+ {
+diff -urN '--exclude=*.vcproj' '--exclude=*.user' '--exclude=bin' '--exclude=obj' '--exclude=*.ncb' '--exclude=*.suo' /cygdrive/e/TDDOWNLOAD/lib/poco-1.4.0-all/Data//ODBC/include/Poco/Data/ODBC/Extractor.h /cygdrive/d/lib/poco-1.4.0/Data//ODBC/include/Poco/Data/ODBC/Extractor.h
+--- /cygdrive/e/TDDOWNLOAD/lib/poco-1.4.0-all/Data//ODBC/include/Poco/Data/ODBC/Extractor.h	2010-12-16 06:45:58.000000000 +0800
++++ /cygdrive/d/lib/poco-1.4.0/Data//ODBC/include/Poco/Data/ODBC/Extractor.h	2011-08-27 14:20:47.348207500 +0800
+@@ -113,6 +113,9 @@
+ 	bool extract(std::size_t pos, Poco::Data::BLOB& val);
+ 		/// Extracts a BLOB.
+ 	
++	//////////////////////////////////MY//////////////////////////////////////
++	bool extract(std::size_t pos, DateTime& val);
++	//////////////////////////////////MY//////////////////////////////////////
+ 	bool extract(std::size_t pos, Poco::Any& val);
+ 		/// Extracts an Any.
+ 
+diff -urN '--exclude=*.vcproj' '--exclude=*.user' '--exclude=bin' '--exclude=obj' '--exclude=*.ncb' '--exclude=*.suo' /cygdrive/e/TDDOWNLOAD/lib/poco-1.4.0-all/Data//ODBC/include/Poco/Data/ODBC/ODBCDateTime.h /cygdrive/d/lib/poco-1.4.0/Data//ODBC/include/Poco/Data/ODBC/ODBCDateTime.h
+--- /cygdrive/e/TDDOWNLOAD/lib/poco-1.4.0-all/Data//ODBC/include/Poco/Data/ODBC/ODBCDateTime.h	1970-01-01 08:00:00.000000000 +0800
++++ /cygdrive/d/lib/poco-1.4.0/Data//ODBC/include/Poco/Data/ODBC/ODBCDateTime.h	2011-05-11 11:55:26.233425300 +0800
+@@ -0,0 +1,47 @@
++#ifndef ODBC_DateTime_INCLUDED
++#define ODBC_DateTime_INCLUDED
++
++#include "Poco/DateTime.h"
++
++namespace Poco {
++namespace Data {
++namespace ODBC {
++
++class ODBCDateTime:public TIMESTAMP_STRUCT
++{
++public:
++	ODBCDateTime(SQLSMALLINT    wyear=0,
++		SQLUSMALLINT   wmonth=0,
++		SQLUSMALLINT   wday=0,
++		SQLUSMALLINT   whour=0,
++		SQLUSMALLINT   wminute=0,
++		SQLUSMALLINT   wsecond=0)
++	{
++		year=wyear;
++		month=wmonth;
++		day=wday;
++		hour=whour;
++		minute=wminute;
++		second=wsecond;
++
++		fraction=0;
++	}
++	ODBCDateTime(const DateTime &val)
++	{
++		year = (SWORD)val.year();
++		month = (UWORD)val.month();
++		day = (UWORD)val.day();
++		hour = (UWORD)val.hour();
++		minute = (UWORD)val.minute();
++		second = (UWORD)val.second();
++
++		fraction = 0;
++	}
++	operator DateTime()
++	{
++		return DateTime(year,month?month:1,day?day:1,hour,minute,second);
++	}
++};
++
++}}}
++#endif
+\ No newline at end of file
+diff -urN '--exclude=*.vcproj' '--exclude=*.user' '--exclude=bin' '--exclude=obj' '--exclude=*.ncb' '--exclude=*.suo' /cygdrive/e/TDDOWNLOAD/lib/poco-1.4.0-all/Data//ODBC/include/Poco/Data/ODBC/Preparation.h /cygdrive/d/lib/poco-1.4.0/Data//ODBC/include/Poco/Data/ODBC/Preparation.h
+--- /cygdrive/e/TDDOWNLOAD/lib/poco-1.4.0-all/Data//ODBC/include/Poco/Data/ODBC/Preparation.h	2010-12-16 06:45:58.000000000 +0800
++++ /cygdrive/d/lib/poco-1.4.0/Data//ODBC/include/Poco/Data/ODBC/Preparation.h	2011-08-27 14:21:22.563221700 +0800
+@@ -143,6 +143,9 @@
+ 	void prepare(std::size_t pos, const Poco::Data::BLOB&);
+ 		/// Prepares a BLOB.
+ 
++	//////////////////////////////////MY//////////////////////////////////////
++	void prepare(std::size_t pos, const DateTime& );
++	//////////////////////////////////MY//////////////////////////////////////
+ 	void prepare(std::size_t pos, const Poco::Any&);
+ 		/// Prepares an Any.
+ 
+@@ -299,6 +302,12 @@
+ 	prepareRaw(pos, SQL_C_BINARY, maxDataSize(pos));
+ }
+ 
++//////////////////////////////////MY//////////////////////////////////////
++inline void Preparation::prepare(std::size_t pos, const DateTime& )
++{
++	preparePOD<TIMESTAMP_STRUCT>(pos, SQL_C_TIMESTAMP);
++}
++//////////////////////////////////MY//////////////////////////////////////
+ 
+ inline std::size_t Preparation::columns() const
+ {
+diff -urN '--exclude=*.vcproj' '--exclude=*.user' '--exclude=bin' '--exclude=obj' '--exclude=*.ncb' '--exclude=*.suo' /cygdrive/e/TDDOWNLOAD/lib/poco-1.4.0-all/Data//ODBC/src/DataTypes.cpp /cygdrive/d/lib/poco-1.4.0/Data//ODBC/src/DataTypes.cpp
+--- /cygdrive/e/TDDOWNLOAD/lib/poco-1.4.0-all/Data//ODBC/src/DataTypes.cpp	2010-12-16 06:45:58.000000000 +0800
++++ /cygdrive/d/lib/poco-1.4.0/Data//ODBC/src/DataTypes.cpp	2011-08-27 14:22:01.815466800 +0800
+@@ -65,7 +65,6 @@
+ 	_cDataTypes.insert(ValueType(SQL_TYPE_DATE, SQL_C_TYPE_DATE));
+ 	_cDataTypes.insert(ValueType(SQL_TYPE_TIME, SQL_C_TYPE_TIME));
+ 	_cDataTypes.insert(ValueType(SQL_TYPE_TIMESTAMP, SQL_C_TYPE_TIMESTAMP));
+-
+ 	_sqlDataTypes.insert(ValueType(SQL_C_CHAR, SQL_LONGVARCHAR));
+ 	_sqlDataTypes.insert(ValueType(SQL_C_BIT, SQL_BIT));
+ 	_sqlDataTypes.insert(ValueType(SQL_C_TINYINT, SQL_TINYINT));
+@@ -85,6 +84,7 @@
+ 	_sqlDataTypes.insert(ValueType(SQL_C_TYPE_DATE, SQL_TYPE_DATE));
+ 	_sqlDataTypes.insert(ValueType(SQL_C_TYPE_TIME, SQL_TYPE_TIME));
+ 	_sqlDataTypes.insert(ValueType(SQL_C_TYPE_TIMESTAMP, SQL_TYPE_TIMESTAMP));
++
+ }
+ 
+ 
+diff -urN '--exclude=*.vcproj' '--exclude=*.user' '--exclude=bin' '--exclude=obj' '--exclude=*.ncb' '--exclude=*.suo' /cygdrive/e/TDDOWNLOAD/lib/poco-1.4.0-all/Data//ODBC/src/Extractor.cpp /cygdrive/d/lib/poco-1.4.0/Data//ODBC/src/Extractor.cpp
+--- /cygdrive/e/TDDOWNLOAD/lib/poco-1.4.0-all/Data//ODBC/src/Extractor.cpp	2010-12-16 06:45:58.000000000 +0800
++++ /cygdrive/d/lib/poco-1.4.0/Data//ODBC/src/Extractor.cpp	2011-05-10 16:50:03.086076100 +0800
+@@ -42,6 +42,9 @@
+ #include "Poco/Buffer.h"
+ #include "Poco/Exception.h"
+ 
++//////////////////////////////////MY//////////////////////////////////////	
++#include "Poco/Data/ODBC/ODBCDateTime.h"
++//////////////////////////////////MY//////////////////////////////////////	
+ 
+ namespace Poco {
+ namespace Data {
+@@ -314,6 +317,23 @@
+ 		return extractBoundImpl(pos, val);
+ }
+ 
++//////////////////////////////////MY//////////////////////////////////////
++bool Extractor::extract(std::size_t pos, DateTime& val)
++{
++	bool ret=false;
++	ODBCDateTime ts;
++	if (Preparation::DE_MANUAL == _dataExtraction)
++		ret=extractManualImpl(pos, ts, SQL_C_TIMESTAMP);
++	else
++		ret=extractBoundImpl(pos, ts);
++
++	if(ret)
++	{
++		val=ts;
++	}
++	return ret;
++}
++//////////////////////////////////MY//////////////////////////////////////
+ 
+ bool Extractor::extract(std::size_t pos, Poco::Any& val)
+ {
+@@ -360,6 +380,10 @@
+ 		case MetaColumn::FDT_BLOB:
+ 		{ Poco::Data::BLOB b; extract(pos, b); val = b; return true; }
+ 
++	//////////////////////////////////MY//////////////////////////////////////
++		case MetaColumn::FDT_DATETIME:
++			{ Poco::DateTime b; extract(pos, b); val = b; return true; }
++	//////////////////////////////////MY//////////////////////////////////////
+ 		default: 
+ 			throw DataFormatException("Unsupported data type.");
+ 	}
+diff -urN '--exclude=*.vcproj' '--exclude=*.user' '--exclude=bin' '--exclude=obj' '--exclude=*.ncb' '--exclude=*.suo' /cygdrive/e/TDDOWNLOAD/lib/poco-1.4.0-all/Data//ODBC/src/ODBCColumn.cpp /cygdrive/d/lib/poco-1.4.0/Data//ODBC/src/ODBCColumn.cpp
+--- /cygdrive/e/TDDOWNLOAD/lib/poco-1.4.0-all/Data//ODBC/src/ODBCColumn.cpp	2010-12-16 06:45:58.000000000 +0800
++++ /cygdrive/d/lib/poco-1.4.0/Data//ODBC/src/ODBCColumn.cpp	2011-08-27 14:22:25.627828800 +0800
+@@ -139,6 +139,12 @@
+ 	case SQL_LONGVARBINARY:
+ 	case -98:// IBM DB2 non-standard type
+ 		setType(MetaColumn::FDT_BLOB); break;
++//////////////////////////////////MY//////////////////////////////////////
++	case SQL_DATE:
++	case SQL_TIME:
++	case SQL_TIMESTAMP:
++		setType(MetaColumn::FDT_DATETIME); break;
++//////////////////////////////////MY//////////////////////////////////////
+ 	default:
+ 		throw DataFormatException("Unsupported data type.");
+ 	}
+diff -urN '--exclude=*.vcproj' '--exclude=*.user' '--exclude=bin' '--exclude=obj' '--exclude=*.ncb' '--exclude=*.suo' /cygdrive/e/TDDOWNLOAD/lib/poco-1.4.0-all/Data//ODBC/src/Preparation.cpp /cygdrive/d/lib/poco-1.4.0/Data//ODBC/src/Preparation.cpp
+--- /cygdrive/e/TDDOWNLOAD/lib/poco-1.4.0-all/Data//ODBC/src/Preparation.cpp	2010-12-16 06:45:58.000000000 +0800
++++ /cygdrive/d/lib/poco-1.4.0/Data//ODBC/src/Preparation.cpp	2011-05-10 15:01:22.653128700 +0800
+@@ -37,6 +37,9 @@
+ #include "Poco/Data/ODBC/Preparation.h"
+ #include "Poco/Data/ODBC/ODBCColumn.h"
+ 
++//////////////////////////////////MY//////////////////////////////////////	
++#include "Poco/Data/ODBC/ODBCDateTime.h"
++//////////////////////////////////MY//////////////////////////////////////	
+ 
+ namespace Poco {
+ namespace Data {
+@@ -162,6 +165,10 @@
+ 		case MetaColumn::FDT_BLOB:
+ 			return prepareRaw(pos, SQL_C_BINARY, maxDataSize(pos));
+ 
++//////////////////////////////////MY//////////////////////////////////////	
++		case MetaColumn::FDT_DATETIME:
++			return preparePOD<ODBCDateTime>(pos, SQL_C_TIMESTAMP);
++//////////////////////////////////MY//////////////////////////////////////
+ 		default: 
+ 			throw DataFormatException("Unsupported data type.");
+ 	}
+diff -urN '--exclude=*.vcproj' '--exclude=*.user' '--exclude=bin' '--exclude=obj' '--exclude=*.ncb' '--exclude=*.suo' /cygdrive/e/TDDOWNLOAD/lib/poco-1.4.0-all/Data//include/Poco/Data/AbstractBinder.h /cygdrive/d/lib/poco-1.4.0/Data//include/Poco/Data/AbstractBinder.h
+--- /cygdrive/e/TDDOWNLOAD/lib/poco-1.4.0-all/Data//include/Poco/Data/AbstractBinder.h	2010-12-16 06:45:52.000000000 +0800
++++ /cygdrive/d/lib/poco-1.4.0/Data//include/Poco/Data/AbstractBinder.h	2011-08-27 14:23:04.175033600 +0800
+@@ -44,6 +44,9 @@
+ #include <cstddef>
+ 
+ 
++//////////////////////////////////MY//////////////////////////////////////
++#include "Poco/DateTime.h"
++//////////////////////////////////MY//////////////////////////////////////
+ namespace Poco {
+ namespace Data {
+ 
+@@ -109,6 +112,9 @@
+ 		
+ 	virtual void bind(std::size_t pos) = 0;
+ 		/// Binds a NULL value.
++//////////////////////////////////MY//////////////////////////////////////
++	virtual void bind(std::size_t pos, const DateTime& val) = 0;
++//////////////////////////////////MY//////////////////////////////////////
+ };
+ 
+ 
+diff -urN '--exclude=*.vcproj' '--exclude=*.user' '--exclude=bin' '--exclude=obj' '--exclude=*.ncb' '--exclude=*.suo' /cygdrive/e/TDDOWNLOAD/lib/poco-1.4.0-all/Data//include/Poco/Data/AbstractExtractor.h /cygdrive/d/lib/poco-1.4.0/Data//include/Poco/Data/AbstractExtractor.h
+--- /cygdrive/e/TDDOWNLOAD/lib/poco-1.4.0-all/Data//include/Poco/Data/AbstractExtractor.h	2010-12-16 06:45:52.000000000 +0800
++++ /cygdrive/d/lib/poco-1.4.0/Data//include/Poco/Data/AbstractExtractor.h	2011-08-27 14:23:22.048055800 +0800
+@@ -44,6 +44,9 @@
+ #include <cstddef>
+ 
+ 
++//////////////////////////////////MY//////////////////////////////////////
++#include "Poco/DateTime.h"
++//////////////////////////////////MY//////////////////////////////////////
+ namespace Poco {
+ namespace Data {
+ 
+@@ -103,6 +106,9 @@
+ 
+ 	virtual bool extract(std::size_t pos, BLOB& val) = 0;
+ 		/// Extracts a BLOB. Returns false if null was received.
++	//////////////////////////////////MY//////////////////////////////////////
++	virtual bool extract(std::size_t pos, DateTime& val) = 0;
++	//////////////////////////////////MY//////////////////////////////////////
+ };
+ 
+ 
+diff -urN '--exclude=*.vcproj' '--exclude=*.user' '--exclude=bin' '--exclude=obj' '--exclude=*.ncb' '--exclude=*.suo' /cygdrive/e/TDDOWNLOAD/lib/poco-1.4.0-all/Data//include/Poco/Data/AbstractPreparation.h /cygdrive/d/lib/poco-1.4.0/Data//include/Poco/Data/AbstractPreparation.h
+--- /cygdrive/e/TDDOWNLOAD/lib/poco-1.4.0-all/Data//include/Poco/Data/AbstractPreparation.h	2010-12-16 06:45:52.000000000 +0800
++++ /cygdrive/d/lib/poco-1.4.0/Data//include/Poco/Data/AbstractPreparation.h	2011-08-27 14:23:39.427049900 +0800
+@@ -45,6 +45,9 @@
+ #include <cstddef>
+ 
+ 
++//////////////////////////////////MY//////////////////////////////////////
++#include "Poco/DateTime.h"
++//////////////////////////////////MY//////////////////////////////////////
+ namespace Poco {
+ namespace Data {
+ 
+@@ -106,6 +109,9 @@
+ 
+ 	virtual void prepare(std::size_t pos, const BLOB&) = 0;
+ 		/// Prepares a BLOB.
++	//////////////////////////////////MY//////////////////////////////////////
++	virtual void prepare(std::size_t pos, const DateTime& ) = 0;
++	//////////////////////////////////MY//////////////////////////////////////
+ };
+ 
+ 
+diff -urN '--exclude=*.vcproj' '--exclude=*.user' '--exclude=bin' '--exclude=obj' '--exclude=*.ncb' '--exclude=*.suo' /cygdrive/e/TDDOWNLOAD/lib/poco-1.4.0-all/Data//include/Poco/Data/BLOB.h /cygdrive/d/lib/poco-1.4.0/Data//include/Poco/Data/BLOB.h
+--- /cygdrive/e/TDDOWNLOAD/lib/poco-1.4.0-all/Data//include/Poco/Data/BLOB.h	2010-12-16 06:45:52.000000000 +0800
++++ /cygdrive/d/lib/poco-1.4.0/Data//include/Poco/Data/BLOB.h	2011-08-27 14:16:07.252186900 +0800
+@@ -120,6 +120,9 @@
+ 	std::size_t size() const;
+ 		/// Returns the size of the BLOB in bytes.
+ 
++	//////////////////////////////////MY//////////////////////////////////////
++	void resize (int sz);
++	//////////////////////////////////MY//////////////////////////////////////
+ private:
+ 	Poco::SharedPtr<std::vector<char> > _pContent;
+ 	
+@@ -210,6 +213,12 @@
+ }
+ 
+ 
++//////////////////////////////////MY//////////////////////////////////////
++inline void BLOB::resize (int sz)
++{
++	_pContent->resize(sz);
++}
++//////////////////////////////////MY//////////////////////////////////////
+ } } // namespace Poco::Data
+ 
+ 
+diff -urN '--exclude=*.vcproj' '--exclude=*.user' '--exclude=bin' '--exclude=obj' '--exclude=*.ncb' '--exclude=*.suo' /cygdrive/e/TDDOWNLOAD/lib/poco-1.4.0-all/Data//include/Poco/Data/MetaColumn.h /cygdrive/d/lib/poco-1.4.0/Data//include/Poco/Data/MetaColumn.h
+--- /cygdrive/e/TDDOWNLOAD/lib/poco-1.4.0-all/Data//include/Poco/Data/MetaColumn.h	2010-12-16 06:45:52.000000000 +0800
++++ /cygdrive/d/lib/poco-1.4.0/Data//include/Poco/Data/MetaColumn.h	2011-05-10 13:51:47.980351000 +0800
+@@ -67,7 +67,10 @@
+ 		FDT_DOUBLE,
+ 		FDT_STRING,
+ 		FDT_BLOB,
+-		FDT_UNKNOWN
++		FDT_UNKNOWN,
++//////////////////////////////////MY//////////////////////////////////////
++		FDT_DATETIME		
++//////////////////////////////////MY//////////////////////////////////////
+ 	};
+ 
+ 	MetaColumn();
+diff -urN '--exclude=*.vcproj' '--exclude=*.user' '--exclude=bin' '--exclude=obj' '--exclude=*.ncb' '--exclude=*.suo' /cygdrive/e/TDDOWNLOAD/lib/poco-1.4.0-all/Data//src/StatementImpl.cpp /cygdrive/d/lib/poco-1.4.0/Data//src/StatementImpl.cpp
+--- /cygdrive/e/TDDOWNLOAD/lib/poco-1.4.0-all/Data//src/StatementImpl.cpp	2010-12-16 06:45:52.000000000 +0800
++++ /cygdrive/d/lib/poco-1.4.0/Data//src/StatementImpl.cpp	2011-05-14 15:31:22.680796700 +0800
+@@ -299,6 +299,11 @@
+ 			case MetaColumn::FDT_BLOB:   
+ 				addInternalExtract<BLOB, std::vector<BLOB> >(mc); 
+ 				break;
++			//////////////////////////////////MY//////////////////////////////////////
++			case MetaColumn::FDT_DATETIME:
++				addInternalExtract<DateTime,std::vector<DateTime>>(mc);
++				break;
++			//////////////////////////////////MY//////////////////////////////////////
+ 			default:
+ 				throw Poco::InvalidArgumentException("Data type not supported.");
+ 		}

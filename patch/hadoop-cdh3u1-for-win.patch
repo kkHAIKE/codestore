@@ -1,0 +1,50 @@
+diff -urN /cygdrive/e/TDDOWNLOAD/lib/hadoop-0.20.2-cdh3u1/hadoop-0.20.2-cdh3u1/src//mapred/org/apache/hadoop/mapred/Child.java /cygdrive/d/lib/hadoop-0.20.2-cdh3u1/src//mapred/org/apache/hadoop/mapred/Child.java
+--- /cygdrive/e/TDDOWNLOAD/lib/hadoop-0.20.2-cdh3u1/hadoop-0.20.2-cdh3u1/src//mapred/org/apache/hadoop/mapred/Child.java	2011-07-19 03:12:32.000000000 +0800
++++ /cygdrive/d/lib/hadoop-0.20.2-cdh3u1/src//mapred/org/apache/hadoop/mapred/Child.java	2011-08-20 15:19:42.399678800 +0800
+@@ -170,9 +170,9 @@
+     t.start();
+     
+     String pid = "";
+-    if (!Shell.WINDOWS) {
++   // if (!Shell.WINDOWS) {
+       pid = System.getenv().get("JVM_PID");
+-    }
++    //}
+     JvmContext context = new JvmContext(jvmId, pid);
+     int idleLoopCount = 0;
+     Task task = null;
+diff -urN /cygdrive/e/TDDOWNLOAD/lib/hadoop-0.20.2-cdh3u1/hadoop-0.20.2-cdh3u1/src//mapred/org/apache/hadoop/mapred/DefaultTaskController.java /cygdrive/d/lib/hadoop-0.20.2-cdh3u1/src//mapred/org/apache/hadoop/mapred/DefaultTaskController.java
+--- /cygdrive/e/TDDOWNLOAD/lib/hadoop-0.20.2-cdh3u1/hadoop-0.20.2-cdh3u1/src//mapred/org/apache/hadoop/mapred/DefaultTaskController.java	2011-07-19 03:12:34.000000000 +0800
++++ /cygdrive/d/lib/hadoop-0.20.2-cdh3u1/src//mapred/org/apache/hadoop/mapred/DefaultTaskController.java	2011-08-20 15:21:56.680359200 +0800
+@@ -41,6 +41,7 @@
+ import org.apache.commons.logging.Log;
+ import org.apache.commons.logging.LogFactory;
+ 
++import org.apache.hadoop.util.Shell;
+ /**
+  * The default implementation for controlling tasks.
+  * 
+@@ -128,7 +129,7 @@
+         throw new IOException("Could not set permissions on " + p, ece);
+       }
+       shExec = new ShellCommandExecutor(new String[]{
+-          "bash", "-c", commandFile},
++          "bash", "-c", (!Shell.WINDOWS)?commandFile:commandFile.substring(1)},
+           currentWorkDirectory);
+       shExec.execute();
+     } catch (ExitCodeException ece) {
+diff -urN /cygdrive/e/TDDOWNLOAD/lib/hadoop-0.20.2-cdh3u1/hadoop-0.20.2-cdh3u1/src//mapred/org/apache/hadoop/mapred/TaskLog.java /cygdrive/d/lib/hadoop-0.20.2-cdh3u1/src//mapred/org/apache/hadoop/mapred/TaskLog.java
+--- /cygdrive/e/TDDOWNLOAD/lib/hadoop-0.20.2-cdh3u1/hadoop-0.20.2-cdh3u1/src//mapred/org/apache/hadoop/mapred/TaskLog.java	2011-07-19 03:12:32.000000000 +0800
++++ /cygdrive/d/lib/hadoop-0.20.2-cdh3u1/src//mapred/org/apache/hadoop/mapred/TaskLog.java	2011-08-20 15:19:42.438681000 +0800
+@@ -551,9 +551,9 @@
+     String stderr = FileUtil.makeShellPath(stderrFilename);
+     StringBuilder mergedCmd = new StringBuilder();
+     
+-    if (!Shell.WINDOWS) {
++    //if (!Shell.WINDOWS) {
+       mergedCmd.append("export JVM_PID=`echo $$`\n");
+-    }
++    //}
+ 
+     if (setup != null) {
+       for (String s : setup) {

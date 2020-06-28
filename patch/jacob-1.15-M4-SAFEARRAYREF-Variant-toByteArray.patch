@@ -1,0 +1,12 @@
+diff -ur /cygdrive/e/TDDOWNLOAD/lib/jacob-1.15-M4_src/jacob-1.15-M4/jni//Variant.cpp /cygdrive/d/lib/jacob-1.15-M4/jni//Variant.cpp
+--- /cygdrive/e/TDDOWNLOAD/lib/jacob-1.15-M4_src/jacob-1.15-M4/jni//Variant.cpp	2008-09-11 21:42:32.000000000 +0800
++++ /cygdrive/d/lib/jacob-1.15-M4/jni//Variant.cpp	2011-08-24 18:50:23.912450900 +0800
+@@ -909,7 +909,7 @@
+     // construct an SA to return
+     jobject newSA = env->NewObject(saClass, saCons);
+     // pass in the deep copy indicator
+-    setSA(env, newSA, V_ARRAY(v), deepCopy == JNI_TRUE ? 1 : 0);
++	setSA(env, newSA, ((V_VT(v) & VT_BYREF==0)?V_ARRAY(v):(*V_ARRAYREF(v))), deepCopy == JNI_TRUE ? 1 : 0);
+     return newSA;
+   }
+   return NULL;
